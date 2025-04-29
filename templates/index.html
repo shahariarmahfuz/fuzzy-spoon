@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Search - Image Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --border-color: #ddd;
+            --error-bg: #f2dede;
+            --error-text: #a94442;
+            --success-bg: #dff0d8;
+            --success-text: #3c763d;
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            flex-grow: 1; /* Allows container to fill space */
+        }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header h1 { margin: 0; color: var(--primary-color); font-size: 1.8em; }
+        .header nav a { margin-left: 10px; }
+        .flash-message { padding: 15px; margin: 20px 0; border-radius: var(--border-radius); border: 1px solid transparent; font-weight: 500; }
+        .flash-message.success { background-color: var(--success-bg); color: var(--success-text); border-color: #d6e9c6; }
+        .flash-message.error { background-color: var(--error-bg); color: var(--error-text); border-color: #ebccd1; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: var(--primary-color); color: white; text-align: center; text-decoration: none; border: none; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.3s ease, transform 0.1s ease; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .footer { text-align: center; margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border-color); color: #777; font-size: 0.9em; background-color: #fff; /* Match container or use a different bg */ }
+        .search-form-container { background-color: #f8f9fa; padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .search-form { display: flex; gap: 10px; align-items: center; }
+        .search-form input[type="text"] { flex-grow: 1; margin: 0; width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius); box-sizing: border-box; font-size: 1em;}
+        .search-form button { flex-shrink: 0; }
+        .search-form a.btn { flex-shrink: 0; } /* Clear button */
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
+        .image-card { background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 15px; box-shadow: var(--card-shadow); transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .image-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); }
+        .image-card .image-link { display: block; overflow: hidden; border-radius: var(--border-radius); margin-bottom: 15px; }
+        .image-card img { display: block; width: 100%; height: 220px; object-fit: cover; border-radius: var(--border-radius); transition: transform 0.3s ease; }
+        .image-card:hover img { transform: scale(1.03); }
+        .image-info { margin-top: auto; padding-top: 10px; }
+        .image-info p { margin: 5px 0; font-size: 0.95em; word-break: break-word; }
+        .image-info strong { color: #555; }
+        .image-id { font-family: monospace; background-color: #e9ecef; padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
+        .image-actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-small { padding: 6px 12px; font-size: 0.85em; }
+        .btn-copy-id { background-color: #ffc107; color: #333; }
+        .btn-copy-id:hover { background-color: #e0a800; }
+        .info-message { text-align: center; font-size: 1.1em; color: #555; margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: var(--border-radius); }
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; align-items: flex-start; }
+            .header h1 { margin-bottom: 10px; }
+            .header nav { margin-top: 10px; width: 100%; display: flex; justify-content: space-around; }
+            .header nav a { margin-left: 0; flex-grow: 1; text-align: center; margin: 5px; }
+            .container { margin: 10px; padding: 15px; }
+            .search-form { flex-direction: column; gap: 15px; }
+             .search-form input[type="text"], .search-form button, .search-form a.btn { width: 100%; }
+             .image-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.5em; }
+            .btn { padding: 8px 12px; font-size: 0.9em;}
+             .image-grid { grid-template-columns: 1fr; } /* Single column */
+             .image-card img { height: 180px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Image Search</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="btn">Search Page</a>
+                <a href="{{ url_for('upload_file') }}" class="btn">Upload Image</a>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <main>
+            <div class="search-form-container">
+                <form method="post" action="{{ url_for('index') }}" class="search-form">
+                    <input type="text" name="search" placeholder="Enter Image ID or Filename to search..." value="{{ search_query if search_query else '' }}" required>
+                    <button type="submit" class="btn">Search</button>
+                    {% if search_query %}
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Clear Search</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            {# --- Image Display Logic --- #}
+            {% if search_attempted and images %}
+                <div class="image-grid">
+                    {% for image in images %}
+                    <div class="image-card">
+                        {# Link uses filename which photo_server can serve/restore #}
+                        <a href="{{ url_for('serve_photo', filename=image['filename']) }}" target="_blank" class="image-link">
+                            <img src="{{ url_for('serve_photo', filename=image['filename']) }}" alt="{{ image['original_filename'] }}" loading="lazy">
+                        </a>
+                        <div class="image-info">
+                            <p><strong>ID:</strong> <span class="image-id">{{ image['id'] }}</span></p>
+                            {# Data from API: original_filename might be truncated #}
+                            <p><strong>Filename:</strong> {{ image['original_filename'] | truncate(30) }}</p>
+                            {# Data from API: upload_date #}
+                            <p><strong>Uploaded:</strong> {{ image['upload_date'][:10] }}</p>
+                            <div class="image-actions">
+                                <a href="{{ url_for('serve_photo', filename=image['filename']) }}" class="btn btn-small" target="_blank">View</a>
+                                <a href="{{ url_for('download_file', image_id=image['id']) }}" class="btn btn-small btn-secondary">Download</a>
+                                <button class="btn btn-small btn-copy-id" data-id="{{ image['id'] }}">Copy ID</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% elif search_attempted and not images %}
+                <p class="info-message">No images found matching your search: "{{ search_query }}"</p>
+            {% elif not search_attempted %}
+                 <p class="info-message">Please enter an Image ID or part of a filename in the search box above to find images.</p>
+            {% endif %}
+            {# --- End Image Display Logic --- #}
+        </main>
+    </div>{# End Container #}
+
+    <footer class="footer">
+         <p>&copy; {{ now().year if now else '2025' }} Image Management System. All rights reserved.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButtons = document.querySelectorAll('.btn-copy-id');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const imageId = this.getAttribute('data-id');
+                navigator.clipboard.writeText(imageId).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    this.disabled = true;
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.disabled = false;
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy ID: ', err);
+                    alert('Could not copy ID.'); // Simple feedback
+                });
+            });
+        });
+    });
+    </script>
+</body>
+</html>

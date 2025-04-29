@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image - Image Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --border-color: #ddd;
+            --error-bg: #f2dede;
+            --error-text: #a94442;
+            --success-bg: #dff0d8;
+            --success-text: #3c763d;
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px; /* Keep consistent width for header/footer */
+            margin: 20px auto;
+            padding: 0 20px; /* Padding for content within container */
+        }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px; /* Padding inside header */
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #fff; /* White background for header */
+             border-radius: var(--border-radius); /* Rounded corners for header */
+             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .header h1 { margin: 0; color: var(--primary-color); font-size: 1.8em; }
+        .header nav a { margin-left: 10px; }
+
+        .upload-container {
+            max-width: 700px;
+            margin: 0 auto 40px auto; /* Center horizontally, add bottom margin */
+            padding: 30px;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+             flex-grow: 1; /* Allow this container to take up space */
+        }
+
+        .flash-message { padding: 15px; margin: 0 0 20px 0; border-radius: var(--border-radius); border: 1px solid transparent; font-weight: 500; }
+        .flash-message.success { background-color: var(--success-bg); color: var(--success-text); border-color: #d6e9c6; }
+        .flash-message.error { background-color: var(--error-bg); color: var(--error-text); border-color: #ebccd1; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: var(--primary-color); color: white; text-align: center; text-decoration: none; border: none; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.3s ease, transform 0.1s ease; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-small { padding: 6px 12px; font-size: 0.85em; }
+
+        .footer { text-align: center; margin-top: auto; /* Pushes footer down */ padding: 20px 0; border-top: 1px solid var(--border-color); color: #777; font-size: 0.9em; background-color: #fff; }
+
+        /* Form specific styling */
+        .upload-container h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            display: inline-block; /* Make border fit content */
+        }
+         .upload-container h2 { /* Center the heading block */
+              display: block; /* Override inline-block for centering */
+             text-align: center;
+         }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius); box-sizing: border-box; font-size: 1em; }
+        input[type="file"] { padding: 10px; border: 1px dashed var(--border-color); background-color: #f8f9fa; cursor: pointer; }
+        .form-group small { display: block; margin-top: 5px; color: #6c757d; font-size: 0.85em; }
+        button[type="submit"].btn { width: 100%; padding: 12px; font-size: 1.1em; margin-top: 10px; }
+
+        /* Success message styling */
+        .upload-success-info { border: 1px solid var(--success-bg); background-color: #f0fff4; padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px; text-align: center; }
+        .upload-success-info h3 { color: var(--success-text); margin-top: 0; }
+        .upload-success-info p { margin: 10px 0; }
+        .image-id { font-family: monospace; background-color: #e9ecef; padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
+        .link-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .link-container input[type="text"] { flex-grow: 1; background-color: #e9ecef; border: 1px solid #ced4da; font-size: 0.95em; cursor: text; }
+        .link-container button { flex-shrink: 0; }
+
+         /* Mobile Responsiveness */
+         @media (max-width: 768px) {
+             .header { flex-direction: column; align-items: flex-start; }
+             .header h1 { margin-bottom: 10px; }
+             .header nav { margin-top: 10px; width: 100%; display: flex; justify-content: space-around; }
+             .header nav a { margin-left: 0; flex-grow: 1; text-align: center; margin: 5px; }
+             .container { margin: 10px auto; padding: 0 10px; }
+             .upload-container { padding: 20px; margin: 0 auto 20px auto; }
+         }
+         @media (max-width: 480px) {
+              .header h1 { font-size: 1.5em; }
+             .btn { padding: 8px 12px; font-size: 0.9em;}
+             .link-container { flex-direction: column; gap: 15px; }
+             .link-container input[type="text"], .link-container button { width: 100%; }
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Upload Image</h1>
+            <nav>
+                 <a href="{{ url_for('index') }}" class="btn">Search Page</a>
+                <a href="{{ url_for('upload_file') }}" class="btn">Upload Image</a>
+            </nav>
+        </header>
+
+        <div class="upload-container">
+             {# Flash messages specifically for the upload page content area #}
+             {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% if uploaded_image_info %}
+                {# Display success message and link AFTER successful upload #}
+                <div class="upload-success-info">
+                    <h3>Upload Successful!</h3>
+                    <p><strong>Image ID:</strong> <span class="image-id">{{ uploaded_image_info.id }}</span></p>
+                    <p><strong>Original Filename:</strong> {{ uploaded_image_info.filename }}</p>
+                    <p><strong>Image Access Link:</strong></p>
+                    <div class="link-container">
+                        <input type="text" id="imageLink" value="{{ uploaded_image_info.url }}" readonly>
+                        <button id="copyButton" class="btn btn-small">Copy Link</button>
+                    </div>
+                     <p style="margin-top: 25px;"><a href="{{ url_for('upload_file') }}" class="btn">Upload Another Image</a></p>
+                </div>
+
+            {% else %}
+                {# Display the upload form if no image was just uploaded #}
+                <h2>Upload New Image</h2>
+                <form method="post" enctype="multipart/form-data" class="upload-form">
+                    <div class="form-group">
+                        <label for="image_id">Custom Image ID (Optional):</label>
+                        {# If form submission failed due to invalid ID, refill it #}
+                        <input type="text" id="image_id" name="image_id" placeholder="Leave blank for auto-ID (e.g., AB-12-CD-34)" autocomplete="off" value="{{ current_custom_id if current_custom_id else '' }}">
+                        <small>If provided, must be unique. Allowed: letters, numbers, hyphens, underscores (max 50 chars).</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file">Select Image File:</label>
+                        <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/gif, image/webp" required>
+                         <small>Allowed: PNG, JPG, JPEG, GIF, WEBP. Max size: 16MB.</small>
+                    </div>
+
+                    <button type="submit" class="btn">Upload Image</button>
+                </form>
+            {% endif %}
+        </div>{# End Upload Container #}
+    </div>{# End Container #}
+
+     <footer class="footer">
+         <p>&copy; {{ now().year if now else '2025' }} Image Management System. All rights reserved.</p>
+    </footer>
+
+    {# Script only needed if success info is shown #}
+    {% if uploaded_image_info %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyButton = document.getElementById('copyButton');
+            const imageLinkInput = document.getElementById('imageLink');
+
+            if (copyButton && imageLinkInput) {
+                copyButton.addEventListener('click', function() {
+                    imageLinkInput.select();
+                    imageLinkInput.setSelectionRange(0, 99999); // For mobile
+
+                    try {
+                        navigator.clipboard.writeText(imageLinkInput.value).then(() => {
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'Copied!';
+                            copyButton.style.backgroundColor = '#28a745'; // Green feedback
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.style.backgroundColor = ''; // Revert color
+                            }, 2000);
+                        }).catch(err => {
+                             console.error('Async copy failed: ', err);
+                             alert('Failed to copy link.');
+                        });
+                    } catch (err) {
+                        console.error('Sync copy failed: ', err);
+                         alert('Failed to copy link.');
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -375,7 +375,7 @@ def serve_photo(filename):
                  logging.error(f"Cannot restore: Filename '{safe_filename}' not found by Data Service.")
                  return "Image record not found by data service", 404
 
-        logging.error(f"Cannot restore: Failed to contact Data Service for dropbox path: {e}")
+    logging.error(f"Cannot restore: Failed to contact Data Service for dropbox path: {e}")
             return "Data service unavailable", 503
         except Exception as e:
              logging.error(f"Cannot restore: Unexpected error getting dropbox path: {e}")

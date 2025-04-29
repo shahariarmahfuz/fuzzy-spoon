@@ -533,4 +533,4 @@ if __name__ == '__main__':
 
     logging.info("Starting Photo Upload Server...")
     # Run on a different port than the data server
-    app.run(host="0.0.0.0", port=5001, debug=True) # Use debug=False in production
+    app.run(host="0.0.0.0", port=5000, debug=True) # Use debug=False in production
